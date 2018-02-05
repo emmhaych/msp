@@ -8,6 +8,7 @@
 #include <map>
 #include "types.hpp"
 #include <iostream>
+#include <atomic>
 
 namespace msp {
 
@@ -163,6 +164,8 @@ public:
      */
     void start();
 
+    void start2();
+
     void run();
 
     /**
@@ -233,9 +236,9 @@ public:
     template<typename T>
     int async_request(const std::function<void(const T&)> &callback, const bool wait_response = true) {
         async_request_raw(uint8_t(T().id()), ByteVector(), wait_response, std::make_shared<CallbackRaw>(
-        [&callback](const ByteVector& payload){
-            std::cout << "decoding " << payload.size() << " bytes" << std::endl;
+        [callback](const ByteVector& payload){
             T request;
+            std::cout << "msg id " << uint(request.id()) << ", decoding " << payload.size() << " bytes" << std::endl;
             request.decode(payload);
             // call the user supplied callback
             callback(request);
@@ -355,7 +358,9 @@ private:
     std::unique_ptr<SerialPortImpl> pimpl;
     // threading
     std::thread thread;
+    std::thread thread_iorun;
     bool running;
+    std::atomic<bool> io_running;
     std::condition_variable cv_request;
     std::condition_variable cv_ack;
     std::mutex mutex_cv_request;
