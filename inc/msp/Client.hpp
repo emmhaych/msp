@@ -173,6 +173,8 @@ public:
      */
     void stop();
 
+    void stop2();
+
     /**
      * @brief read blocking read a single byte from either the buffer or the serial device
      * @return byte from buffer or device
